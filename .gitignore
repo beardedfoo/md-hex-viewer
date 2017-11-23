@@ -50,3 +50,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# GenDev
+build
+src/boot
+
+# Finder metadata
+.DS_Store
