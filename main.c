@@ -102,11 +102,17 @@ void u32toa(u32 b, char *str) {
 // Convert a byte to a string containing a single printable ascii
 // char
 void byte_to_charstr(u8 b, char *str) {
+  // Only some byte ranges are printable in ASCII
   if (b >= ASCII_MIN_VALUE && b <= ASCII_MAX_VALUE) {
+    // For the printable range use the raw byte value as a char
     str[0] = b;
   } else {
+    // For non-printable ranges use some default character instead
     str[0] = DEFAULT_ASCII_CHAR;
   }
+
+  // Strings in C are NULL terminated, so this means no more
+  // characters follow for this string.
   str[1] = NULL;
 }
 
@@ -134,7 +140,7 @@ int main()
     // Wait for the v-blank interrupt (after a frame has drawn)
     VDP_waitVSync();
 
-    // Allow the user to browse the memory with the d-pad
+    // Read the current state of the gamepad for player 1
     u8 joy_state = JOY_readJoypad(JOY_1);
 
     // Decrement the memory base with d-pad up
