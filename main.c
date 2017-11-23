@@ -43,7 +43,6 @@
 #define BASE_STEP_SIZE 8
 #define BASE_LARGE_STEP_SIZE 0x100
 
-
 // An array for byte to hex string conversion. This approach
 // optimizes for cpu cycles over memory usage, but realistically
 // doesn't take up very much space in ROM.
