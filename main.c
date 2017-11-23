@@ -11,7 +11,7 @@
 #define BASE_X 5
 #define BASE_Y 1
 
-// Where on screen should the offset amounts appear?
+// Where on screen should the row address offsets appear?
 #define OFFSET_X 1
 #define OFFSET_Y 2
 
@@ -45,7 +45,7 @@
 
 
 // An array for byte to hex string conversion. This approach
-// favors cpu cycles over memory bytes, but realistically
+// optimizes for cpu cycles over memory usage, but realistically
 // doesn't take up very much space in ROM.
 char *itoa_map[0x100] = {
   "00",  "01",  "02",  "03",  "04",  "05",  "06",  "07",
@@ -118,17 +118,17 @@ void byte_to_charstr(u8 b, char *str) {
 
 int main()
 {
-  // Init the video chip
+  // Initialize the video chip
   VDP_init();
 
-  // Init gamepad handling
+  // Initialize gamepad handling
   JOY_init();
 
   // Begin viewing the memory at this address
   u32 base = 0x00000000;
 
   // Create a pointer to the base memory address. By accessing
-  // this pointer we are directly accessing that memory address
+  // this "array" we are directly accessing that memory address
   // and the addresses that follow.
   u8 *data = (u8*)base;
 
@@ -137,13 +137,14 @@ int main()
 
   // Loop the rest of the app
   while(1) {
-    // Wait for the v-blank interrupt (after a frame has drawn)
+    // Wait for the video chip to finish drawing a frame
     VDP_waitVSync();
 
     // Read the current state of the gamepad for player 1
     u8 joy_state = JOY_readJoypad(JOY_1);
 
     // Decrement the memory base with d-pad up
+    // (lower addresses appear higher on the screen)
     if (joy_state & BUTTON_UP) {
       if (base >= BASE_STEP_SIZE) {
         base -= BASE_STEP_SIZE;
@@ -158,6 +159,7 @@ int main()
     }
 
     // Increment the memory base with d-pad down
+    // (higher addresses appear lower on the screen)
     if (joy_state & BUTTON_DOWN) {
       base += BASE_STEP_SIZE;
     }
@@ -177,17 +179,17 @@ int main()
 
     // Draw hex display
     for (u8 row = 0; row < EDITOR_ROWS; row++) {
-      // Draw the row offset
+      // Draw the row offset (address relative to base for start of row)
       u8toa((row * EDITOR_COLS) + (base & 0xFF), msg);
       msg[2] = ':';
       msg[3] = NULL;
       VDP_drawText(msg, OFFSET_X, OFFSET_Y + row);
 
       for (u8 col = 0; col < EDITOR_COLS; col++) {
-        // Calculate the memory offset within the base for this byte
+        // Calculate the memory offset for this byte relative to the base address
         u8 offset = (row * 8) + col;
 
-        // Convert the designated address into a hex string
+        // Convert the byte at the designated address into a hex string
         u8toa(data[offset], msg);
 
         // Calculate the position on screen for this byte and draw
